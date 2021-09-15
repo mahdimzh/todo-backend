@@ -57,14 +57,14 @@ app.use(express.urlencoded({ extended: false }));
 app.get('/',
   body('pageNumber').isEmpty(),
   body('nPerPage').isEmpty(),
-  body('sortOrder').isEmpty(),
+//  body('sortOrder').isEmpty(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { pageNumber, nPerPage, sortOrder, query } = req.query;
+    const { pageNumber, nPerPage, query } = req.query;
 
     const queries = query.split(',');
     const todos = database.client.db('todos').collection('todos');
