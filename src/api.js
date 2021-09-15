@@ -57,7 +57,7 @@ app.use(express.urlencoded({ extended: false }));
 app.get('/',
   body('pageNumber').isEmpty(),
   body('nPerPage').isEmpty(),
-//  body('sortOrder').isEmpty(),
+  //  body('sortOrder').isEmpty(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -106,7 +106,7 @@ app.post('/',
     const maxSeq = await database.client.db('todos').collection('todos').find().sort({ "seq": -1 }).limit(1).toArray();
     logger.log('info', "finding doc with max seq", maxSeq);
 
-    const todo = { id: generateId(), text, completed: false, seq: maxSeq.length > 0 ? maxSeq[0].seq + 1 : parseFloat("1")  };
+    const todo = { id: generateId(), text, completed: false, seq: maxSeq.length > 0 ? maxSeq[0].seq + 1 : parseFloat("1") };
 
     await database.client.db('todos').collection('todos').insertOne(todo);
     res.status(201);
@@ -171,21 +171,21 @@ app.post('/reorder',
 
     const source = await database.client.db('todos').collection('todos').findOne({ id: sourceId });
     const destincation = await database.client.db('todos').collection('todos').findOne({ id: destinationId });
-    if(source && destincation) {
+    if (source && destincation) {
       let operand = source.seq >= destincation.seq ? '$lte' : '$gte';
-   //   let operandValue = source.seq >= destincation.seq ? source.seq : destincation.seq;
-     // let id1 = reorder[1].seq <= reorder[0].seq ? reorder[1].id : reorder[0].id;
+      //   let operandValue = source.seq >= destincation.seq ? source.seq : destincation.seq;
+      // let id1 = reorder[1].seq <= reorder[0].seq ? reorder[1].id : reorder[0].id;
       let seq = {};
       seq[operand] = destincation.seq
       let q = {};
       q["seq"] = seq
-      
+
       const list = await database.client.db('todos').collection('todos').find(q).limit(2).toArray();
-      if(list.length == 1 || list.length == 2) {
-        let newSequence = list.length == 2 ? ((list[0].seq + list[1].seq) / 2) : (operand === '$gte' ? (list[0].seq + 1) : (list[0].seq - 1) )
+      if (list.length == 1 || list.length == 2) {
+        let newSequence = list.length == 2 ? ((list[0].seq + list[1].seq) / 2) : (operand === '$gte' ? (list[0].seq + 1) : (list[0].seq - 1))
         await database.client.db('todos').collection('todos').updateOne({ id: source.id },
-          { $set: { seq: newSequence} });
-    
+          { $set: { seq: newSequence } });
+
       }
 
       logger.log('info', "reordering done");
